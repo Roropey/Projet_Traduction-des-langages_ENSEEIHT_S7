@@ -38,9 +38,7 @@ let rec analyse_type_expression e =
       | Numerateur -> (Int,AstType.Unaire (Numerateur,ne))
       | Denominateur -> (Int,AstType.Unaire (Denominateur,ne))
     end
-    | Bool -> raise(TypeInattendu (Bool,Rat))
-    | Int -> raise(TypeInattendu (Int,Rat))
-    | Undefined -> raise(TypeInattendu (Undefined,Rat))
+    | _ -> raise(TypeInattendu (te,Rat))
     end    
   | AstTds.Binaire (binaire, e1, e2) ->  
     begin  
