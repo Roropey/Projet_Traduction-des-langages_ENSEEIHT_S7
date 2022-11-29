@@ -191,12 +191,11 @@ match chercherLocalement tds n with
 en une fonction de type AstTds.fonction *)
 (* Erreur si mauvaise utilisation des identifiants *)
 let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li))  =
-  
-  
+    
   match chercherLocalement maintds n with
   | Some _ -> raise (DoubleDeclaration n)
   | None -> let newinfo = info_to_info_ast (InfoFun (n,Undefined,[])) in
-            ajouter maintds n newinfo; (*Modif enlève 12 failed tests mais pas sûr*)
+            ajouter maintds n newinfo;
             let newtds = creerTDSFille maintds in
             let listinfo = List.map (analyse_tds_typ_string newtds) lp in  
             let tdsbloc = analyse_tds_bloc newtds (Some newinfo) li in         
