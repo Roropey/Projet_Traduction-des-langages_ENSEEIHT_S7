@@ -38,9 +38,7 @@ let rec analyse_type_expression e =
       | Numerateur -> (Int,AstType.Unaire (Numerateur,ne))
       | Denominateur -> (Int,AstType.Unaire (Denominateur,ne))
     end
-    | Bool -> raise(TypeInattendu (Bool,Rat))
-    | Int -> raise(TypeInattendu (Int,Rat))
-    | Undefined -> raise(TypeInattendu (Undefined,Rat))
+    | _ -> raise(TypeInattendu (te,Rat))
     end    
   | AstTds.Binaire (binaire, e1, e2) ->  
     begin  
@@ -64,19 +62,21 @@ let rec analyse_type_expression e =
     end
     
   
-  | AstTds.AppelFonction _ -> failwith "pas traiter"
-    (*begin
-      match chercherGlobalement tds n  with
-      | Some info -> 
-        begin
-          match info_ast_to_info info with
-          | InfoFun _ -> let listne = List.map (analyse_tds_expression tds) liste in
-                            AstType.AppelFonction(info,listne)
-          | _ -> raise(MauvaiseUtilisationIdentifiant n)
+  | AstTds.AppelFonction (info,eliste) -> 
+    let sepExpr = fun  (_,e) -> e in
+    let sepTyp = fun  (t,_) -> t in
+    let teneliste = List.map analyse_type_expression eliste in
+    let neliste = List.map sepExpr teneliste in
+    let teliste = List.map sepTyp teneliste in
+    match info_ast_to_info info with
+    | InfoFun (_,t,tl) -> 
+      begin
+        if (est_compatible_list tl teliste) then
+          (t,AstType.AppelFonction(info,neliste))
+        else
+          raise (TypesParametresInattendus(teliste,tl))
         end
-      | None -> raise(IdentifiantNonDeclare n)
-    end*)
-
+    | _ -> failwith "Internal error"
 
 
 (* analyse_type_instruction : AstTds.instruction -> AstType.instruction *)
@@ -148,8 +148,16 @@ let rec analyse_type_instruction i =
         raise(TypeInattendu(te,Bool))
     end
   | AstTds.Retour (e,info) ->
-    let (_,ne) = analyse_type_expression e in
-    AstType.Retour (ne,info)
+    let (te,ne) = analyse_type_expression e in
+    match info_ast_to_info info with
+    | InfoFun (_,t,_) ->
+      begin
+        if (est_compatible t te) then
+          AstType.Retour (ne,info)
+        else
+          raise (TypeInattendu(te,t))
+      end
+    | _ -> failwith "Internal error"
   
 
 
@@ -163,12 +171,20 @@ and analyse_type_bloc li =
    (* afficher_locale tdsbloc ; *) (* décommenter pour afficher la table locale *)
    nli
 
-let analyse_tds_typ_string tds (t,n) =
-match chercherLocalement tds n with
-| Some _ -> raise (DoubleDeclaration n)
-| _ -> let newinfo = info_to_info_ast (InfoVar (n,Undefined,0,"")) in
-        ajouter tds n newinfo;
-        (t,newinfo)
+let rec modif_param_fun liste =
+  match liste with
+  | [] -> []
+  | (t,info)::tl ->
+    begin
+      modifier_type_variable t info;
+      info::(modif_param_fun tl)
+    end
+
+let rec recup_list_param liste =
+  match liste with
+  | [] -> []
+  | (t,_)::tl ->
+    t::(recup_list_param tl)
 
 (* analyse_tds_fonction : tds -> AstSyntax.fonction -> AstType.fonction *)
 (* Paramètre tds : la table des symboles courante *)
@@ -177,7 +193,12 @@ match chercherLocalement tds n with
 en une fonction de type AstType.fonction *)
 (* Erreur si mauvaise utilisation des identifiants *)
 let analyse_type_fonction (AstTds.Fonction(t,info,lp,b))  =
-  failwith "non traité"    
+  let tp = recup_list_param lp in
+  modifier_type_fonction t tp info;
+  let nlp = modif_param_fun lp in
+  let nb = analyse_type_bloc b in
+  AstType.Fonction(info,nlp,nb)
+
 (*
   match chercherLocalement maintds n with
   | Some _ -> raise (DoubleDeclaration n)
