@@ -166,7 +166,7 @@ let analyse_placement_fonction reg (AstType.Fonction(info,lp,b))  =
     
   let nb = analyse_placement_bloc b 3 reg in
   let nlp = placement_list_param_fun (List.rev lp) reg 0 in
-  AstPlacement.Fonction(info,nlp,nb)
+  AstPlacement.Fonction(info,(List.rev nlp),nb)
             
              
 
