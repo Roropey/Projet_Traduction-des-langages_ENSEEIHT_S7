@@ -7,77 +7,8 @@ open Ast
 
 type t1 = Ast.AstType.programme
 type t2 = Ast.AstPlacement.programme
-(*
-(* analyse_type_expression : AstType.expression -> AstPlacement.expression *)
-(* Paramètre e : l'expression à analyser *)
-(* Vérifie la bonne utilisation des types et tranforme l'expression
-en une expression de type AstPlacement.expression *)
-(* Erreur si mauvaise utilisation des identifiants *)
-let rec analyse_type_expression e = 
-  match e with
-   | AstType.Ident info ->
-        begin
-          match info_ast_to_info info with
-          | InfoFun _ -> failwith "Internal Error"
-          | InfoConst ( _, valeur ) -> (Int,AstPlacement.Entier(valeur))
-          | InfoVar (_, t, _, _) -> (t,AstPlacement.Ident(info))
-        end
-      
-     
-  | AstType.Booleen b -> 
-      (Bool,AstPlacement.Booleen (b))
-  | AstType.Entier e ->
-      (Int,AstPlacement.Entier(e))
-  | AstType.Unaire (unaire,e) -> 
-    begin    
-    let (te, ne) = analyse_type_expression e in
-    match te with
-    | Rat -> 
-      begin
-      match unaire with
-      | Numerateur -> (Int,AstPlacement.Unaire (Numerateur,ne))
-      | Denominateur -> (Int,AstPlacement.Unaire (Denominateur,ne))
-    end
-    | _ -> raise(TypeInattendu (te,Rat))
-    end    
-  | AstType.Binaire (binaire, e1, e2) ->  
-    begin  
-      let (te2,ne2) = analyse_type_expression e2 in
-      let (te1,ne1) = analyse_type_expression e1 in
-      if (est_compatible te1 te2) then
-        begin
-        match (te1,binaire) with        
-        | Int, Fraction -> (Rat,AstPlacement.Binaire(Fraction,ne1,ne2))
-        | Int, Plus -> (Int,AstPlacement.Binaire(PlusInt,ne1,ne2))
-        | Rat, Plus -> (Rat,AstPlacement.Binaire(PlusRat,ne1,ne2))
-        | Int, Mult -> (Int,AstPlacement.Binaire(MultInt,ne1,ne2))
-        | Rat, Mult -> (Rat,AstPlacement.Binaire(MultRat,ne1,ne2))
-        | Int, Equ -> (Bool,AstPlacement.Binaire(EquInt,ne1,ne2))
-        | Bool, Equ -> (Bool,AstPlacement.Binaire(EquBool,ne1,ne2))
-        | Int, Inf -> (Bool,AstPlacement.Binaire(Inf,ne1,ne2))
-        | _ -> raise (TypeBinaireInattendu (binaire, te1, te2))
-        end
-      else raise(TypeBinaireInattendu (binaire,te1,te2))
-  
-    end
-    
-  
-  | AstType.AppelFonction _ -> failwith "pas traiter"
-    (*begin
-      match chercherGlobalement tds n  with
-      | Some info -> 
-        begin
-          match info_ast_to_info info with
-          | InfoFun _ -> let listne = List.map (analyse_tds_expression tds) liste in
-                            AstPlacement.AppelFonction(info,listne)
-          | _ -> raise(MauvaiseUtilisationIdentifiant n)
-        end
-      | None -> raise(IdentifiantNonDeclare n)
-    end*)
 
-*)
-
-(* analyse_type_instruction : AstType.instruction -> AstPlacement.instruction *)
+(* analyse_placement_instruction : AstType.instruction -> AstPlacement.instruction *)
 (* Paramètre i : l'instruction à analyser *)
 (* Vérifie la bonne utilisation des types et tranforme l'instruction
 en une instruction de type AstPlacement.instruction *)
