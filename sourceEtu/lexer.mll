@@ -28,8 +28,12 @@
         "num",     NUM;
         "denom",   DENOM;
         "true",    TRUE;
-        "false",   FALSE;
-        "return",  RETURN
+        "false",   FALSE;        
+        "return",  RETURN;
+
+        "new",     NEW;
+        "&",       ADRESSE;
+        "null",    NULL
       ];
     fun id ->
       match Hashtbl.find_opt kws id with
