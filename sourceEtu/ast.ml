@@ -32,8 +32,8 @@ type affectable =
 type expression =
   (* Appel de fonction représenté par le nom de la fonction et la liste des paramètres réels *)
   | AppelFonction of string * expression list
-  (* Accès à un identifiant représenté par son nom *)
-  | Ident of string
+  (* Accès à un identifiant représenté par son nom 
+  | Ident of string *)
   (* Booléen *)
   | Booleen of bool
   (* Entier *)
@@ -64,7 +64,6 @@ and instruction =
   | TantQue of expression * bloc
   (* return d'une fonction *)
   | Retour of expression
-  | AffectationAffectable of  * expression
 
 (* Structure des fonctions de Rat *)
 (* type de retour - nom - liste des paramètres (association type et nom) - corps de la fonction *)
@@ -90,7 +89,7 @@ struct
   remplacés par les informations associées aux identificateurs *)
   type expression =
     | AppelFonction of Tds.info_ast * expression list
-    | Ident of Tds.info_ast (* le nom de l'identifiant est remplacé par ses informations *)
+    (*| Ident of Tds.info_ast  le nom de l'identifiant est remplacé par ses informations *)
     | Booleen of bool
     | Entier of int
     | Unaire of AstSyntax.unaire * expression
@@ -145,7 +144,7 @@ type affectable =
 (* = expression de AstTds *)
 type expression =
   | AppelFonction of Tds.info_ast * expression list
-  | Ident of Tds.info_ast
+  (*| Ident of Tds.info_ast*)
   | Booleen of bool
   | Entier of int
   | Unaire of unaire * expression

@@ -36,6 +36,10 @@ open Ast.AstSyntax
 %token MULT
 %token INF
 %token EOF
+(*Ajout token pour pointeur*)
+%token NEW
+%token ADRESSE
+%token NULL
 
 (* Type de l'attribut synthétisé des non-terminaux *)
 %type <programme> prog
@@ -64,31 +68,28 @@ bloc : AO li=i* AF      {li}
 
 i :
 | t=typ n=ID EQUAL e1=e PV          {Declaration (t,n,e1)}
-| n=af EQUAL e1=e PV                {Affectation (n,e1)}
+| n=af EQUAL e1=e PV                {Affectation (n,e1)}    (*Modification pour pointeur*)
 | CONST n=ID EQUAL e=ENTIER PV      {Constante (n,e)}
 | PRINT e1=e PV                     {Affichage (e1)}
 | IF exp=e li1=bloc ELSE li2=bloc   {Conditionnelle (exp,li1,li2)}
 | WHILE exp=e li=bloc               {TantQue (exp,li)}
 | RETURN exp=e PV                   {Retour (exp)}
-| ADRESSE n=af                      {Adresse (n)}
-| n=af                              {Affectable (n)}
-| NULL                              {Null}
-| NEW t=typ                         {New (t)}
 
+(*Création affectable*)
 af :
-| n=ID {Ident n}
-| n=af {Deref n}
+| n = ID {Ident n}
+| MULT n = af {Deref n}
 
 typ :
 | BOOL    {Bool}
 | INT     {Int}
 | RAT     {Rat}
-| MULT t=typ {Pointeur}
+| t=typ MULT {Pointeur t} (*Ajout règle typage pour pointeur*)
+| PO t=typ PF {Parenthesage t} (*Ajout règle pour la gestion des types parenthésés*)
 
 e : 
 | CALL n=ID PO lp=e* PF   {AppelFonction (n,lp)}
 | CO e1=e SLASH e2=e CF   {Binaire(Fraction,e1,e2)}
-| n=ID                    {Ident n}
 | TRUE                    {Booleen true}
 | FALSE                   {Booleen false}
 | e=ENTIER                {Entier e}
@@ -99,5 +100,11 @@ e :
 | PO e1=e EQUAL e2=e PF   {Binaire (Equ,e1,e2)}
 | PO e1=e INF e2=e PF     {Binaire (Inf,e1,e2)}
 | PO exp=e PF             {exp}
+| ADRESSE n=ID            {Adresse n}           (*Ajout pour pointeur*)
+| n=af                    {Affectable n}        (*Ajout pour pointeur*)
+| NULL                    {Null}                (*Ajout pour pointeur*)
+| PO NEW t=typ PF         {New (t)}             (*Ajout pour pointeur*)
+(*| n=ID                    {Ident n}*)
+
 
 

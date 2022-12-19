@@ -7,6 +7,29 @@ open Ast
 type t1 = Ast.AstSyntax.programme
 type t2 = Ast.AstTds.programme
 
+
+let rec analyse_tds_affectable tds af modif =
+  match af with  
+  | AstSyntax.Deref affectee -> AstTds.Deref(analyse_tds_affectable tds affectee false)
+  | AstSyntax.Ident n -> 
+    begin
+      match chercherGlobalement tds n  with
+      | Some info -> 
+        begin
+          match info_ast_to_info info with
+          | InfoFun _ -> raise(MauvaiseUtilisationIdentifiant n)
+          | InfoVar _ -> AstTds.Ident(info)
+          | InfoConst _ -> 
+            begin
+              if modif then raise(MauvaiseUtilisationIdentifiant n)
+              else AstTds.Ident(info)
+            end
+        end
+      | None -> raise(IdentifiantNonDeclare n)
+    end
+
+
+
 (* analyse_tds_expression : tds -> AstSyntax.expression -> AstTds.expression *)
 (* Paramètre tds : la table des symboles courante *)
 (* Paramètre e : l'expression à analyser *)
@@ -15,20 +38,10 @@ en une expression de type AstTds.expression *)
 (* Erreur si mauvaise utilisation des identifiants *)
 let rec analyse_tds_expression tds e = 
   match e with
-   | AstSyntax.Ident n ->
-      begin
-        match chercherGlobalement tds n  with
-        | Some info -> 
-          begin
-            match info_ast_to_info info with
-            | InfoFun _ -> raise(MauvaiseUtilisationIdentifiant n)
-            | InfoConst ( _, valeur ) -> AstTds.Entier(valeur)
-            | InfoVar _ -> AstTds.Ident(info)
-          end
-        | None -> raise(IdentifiantNonDeclare n)
-      end
+    | AstSyntax.Affectable af -> 
+      AstTds.Affectable(analyse_tds_affectable tds af false)
     | AstSyntax.Booleen b ->
-      AstTds.Booleen (b)
+      AstTds.Booleen(b)
     | AstSyntax.Entier e ->
       AstTds.Entier(e)
     | AstSyntax.Unaire (unaire,e) ->      
@@ -48,6 +61,19 @@ let rec analyse_tds_expression tds e =
                               AstTds.AppelFonction(info,listne)
             | _ -> raise(MauvaiseUtilisationIdentifiant n)
           end
+        | None -> raise(IdentifiantNonDeclare n)
+      end
+    | AstSyntax.Null -> AstTds.Null
+    | AstSyntax.New t -> AstTds.New(t)
+    | AstSyntax.Adresse n -> 
+      begin
+        match chercherGlobalement tds n  with
+        | Some info -> 
+          begin
+            match info_ast_to_info info with
+            | InfoVar _ -> AstTds.Adresse(info)
+            | _ -> raise(MauvaiseUtilisationIdentifiant n)
+          end           
         | None -> raise(IdentifiantNonDeclare n)
       end
 
@@ -86,7 +112,11 @@ let rec analyse_tds_instruction tds oia i =
             il a donc déjà été déclaré dans le bloc courant *)
             raise (DoubleDeclaration n)
       end
-  | AstSyntax.Affectation (n,e) ->
+  | AstSyntax.Affectation (af,e) ->
+        let naf = analyse_tds_affectable tds af true in
+        let ne = analyse_tds_expression tds e in
+        AstTds.Affectation (naf, ne)
+        (*
       begin
         match chercherGlobalement tds n with
         | None ->
@@ -103,12 +133,12 @@ let rec analyse_tds_instruction tds oia i =
               let ne = analyse_tds_expression tds e in
               (* Renvoie de la nouvelle affectation où le nom a été remplacé par l'information
                  et l'expression remplacée par l'expression issue de l'analyse *)
-              AstTds.Affectation (info, ne)
+              
             |  _ ->
               (* Modification d'une constante ou d'une fonction *)
               raise (MauvaiseUtilisationIdentifiant n)
           end
-      end
+      end*)
   | AstSyntax.Constante (n,v) ->
       begin
         match chercherLocalement tds n with
