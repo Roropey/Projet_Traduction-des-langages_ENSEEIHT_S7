@@ -8,11 +8,12 @@ open Ast
 type t1 = Ast.AstType.programme
 type t2 = Ast.AstPlacement.programme
 
-(* analyse_placement_instruction : AstType.instruction -> AstPlacement.instruction *)
+(* analyse_placement_instruction : AstType.instruction -> int -> String -> AstPlacement.instruction *)
 (* Paramètre i : l'instruction à analyser *)
-(* Vérifie la bonne utilisation des types et tranforme l'instruction
-en une instruction de type AstPlacement.instruction *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Paramètre dep : le déplacement actuel au début de l'instruction pour le placement *)
+(* Paramètre reg : règle où est placée l'instruction *)
+(* Tranforme l'instruction en une instruction de type AstPlacement.instruction et
+ renvoie la place occupée par l'instruction *)
 let rec analyse_placement_instruction i dep reg =
   match i with
   | AstType.Declaration (info,e) ->
@@ -26,8 +27,8 @@ let rec analyse_placement_instruction i dep reg =
       | _ -> failwith "Internal error"
     end
     
-  | AstType.Affectation (info,e) ->
-      (AstPlacement.Affectation(info,e),0)
+  | AstType.Affectation (af,e) ->
+      (AstPlacement.Affectation(af,e),0)
     
   | AstType.Empty ->
       (AstPlacement.Empty,0)
@@ -60,10 +61,11 @@ let rec analyse_placement_instruction i dep reg =
       end
 
 
-(* analyse_placement_bloc :  AstType.bloc -> AstPlacement.bloc *)
+(* analyse_placement_bloc :  AstType.bloc -> int -> String -> AstPlacement.bloc *)
 (* Paramètre li : liste d'instructions à analyser *)
-(* Vérifie la bonne utilisation des types et tranforme le bloc en un bloc de type AstPlacement.bloc *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Paramètre dep : le déplacement actuel au début de le bloc pour le placement *)
+(* Paramètre reg : règle où est placée le bloc *)
+(* Tranforme le bloc en un bloc de type AstPlacement.bloc *)
 and analyse_placement_bloc li dep reg =
   match li with
   | [] -> ([],0)
@@ -74,6 +76,12 @@ and analyse_placement_bloc li dep reg =
       (nhd::ntl,thd+ttl)
     end
 
+
+(* placement_list_param_fun : info_ast list -> String -> int -> info_ast list*)
+(* Paramètre liste : liste des paramètres à placer *)
+(* Paramètre reg : règle où placer les paramiètres *)
+(* Paramètre dep : déplacement actuel dans le placement dans la règle *)
+(* Place les infos des paramètres d'une fonction dans la règle *)
 let rec placement_list_param_fun liste reg dep =
   match liste with
   | [] -> []
@@ -87,12 +95,11 @@ let rec placement_list_param_fun liste reg dep =
       | _ -> failwith "Internal error"
     end
 
+
 (* analyse_placement_fonction : tds -> AstSyntax.fonction -> AstPlacement.fonction *)
-(* Paramètre tds : la table des symboles courante *)
-(* Paramètre : la fonction à analyser *)
-(* Vérifie la bonne utilisation des identifiants et tranforme la fonction
-en une fonction de type AstPlacement.fonction *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Paramètre reg : règle où est placée la fonction *)
+(* Paramètre (AstType.Fonction(info,lp,b)) : la fonction à analyser *)
+(* Tranforme la fonction en une instruction de type AstPlacement.fonction *)
 let analyse_placement_fonction reg (AstType.Fonction(info,lp,b))  =
     
   let nb = analyse_placement_bloc b 3 reg in
@@ -108,9 +115,8 @@ let analyse_placement_fonction reg (AstType.Fonction(info,lp,b))  =
 
 (* analyser : AstType.programme -> AstPlacement.programme *)
 (* Paramètre : le programme à analyser *)
-(* Vérifie la bonne utilisation des identifiants et tranforme le programme
+(* Réalise le placement des informations et tranforme le programme
 en un programme de type AstPlacement.programme *)
-(* Erreur si mauvaise utilisation des identifiants *)
 let analyser (AstType.Programme (fonctions,prog)) =
   
   let nf = List.map (analyse_placement_fonction "LB") fonctions in

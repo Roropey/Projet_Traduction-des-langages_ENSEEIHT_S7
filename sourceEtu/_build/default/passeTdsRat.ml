@@ -7,7 +7,13 @@ open Ast
 type t1 = Ast.AstSyntax.programme
 type t2 = Ast.AstTds.programme
 
-
+(* analyse_tds_affectable : tds -> AstSyntax.affectable -> AstTds.affectable *)
+(* Paramètre tds : la table des symboles courante *)
+(* Paramètre af : l'affectable à analyser *)
+(* Paramètre modif : booléen indiquant si l'affectable est modifié ou non *)
+(* Vérifie la bonne utilisation des identifiants et tranforme l'affectable
+en une affectable de type AstTds.affectable *)
+(* Erreur si mauvaise utilisation des identifiants *)
 let rec analyse_tds_affectable tds af modif =
   match af with  
   | AstSyntax.Deref affectee -> AstTds.Deref(analyse_tds_affectable tds affectee false)

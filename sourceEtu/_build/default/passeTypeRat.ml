@@ -8,21 +8,37 @@ open Ast
 type t1 = Ast.AstTds.programme
 type t2 = Ast.AstType.programme
 
+(* analyse_type_affectable : AstTds.affectable -> AstType.affectable *)
+(* Paramètre af : l'affectable à analyser *)
+(* Vérifie la bonne utilisation des types et tranforme l'affectable
+en une affectable de type AstType.affectable *)
+(* Erreur si mauvaise utilisation des types *)
+let rec analyse_type_affectable af =
+  match af with
+  | AstTds.Ident info ->
+    begin
+      match info_ast_to_info info with
+      | InfoVar (_,t,_,_) -> (t,AstType.Ident(info))      
+      | InfoConst _ -> (Int,AstType.Ident(info))
+      | InfoFun _ -> failwith "Internal Error"
+    end
+  | AstTds.Deref aff ->
+    begin
+      match analyse_type_affectable aff with
+      | (Pointeur t, naff) -> (t,AstType.Deref(naff))
+      | (t,_) -> raise (TypeNonPointeur t)
+    end
+
 (* analyse_type_expression : AstTds.expression -> AstType.expression *)
 (* Paramètre e : l'expression à analyser *)
 (* Vérifie la bonne utilisation des types et tranforme l'expression
 en une expression de type AstType.expression *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Erreur si mauvaise utilisation des types *)
 let rec analyse_type_expression e = 
   match e with
-   | AstTds.Ident info ->
-        begin
-          match info_ast_to_info info with
-          | InfoFun _ -> failwith "Internal Error"
-          | InfoConst ( _, valeur ) -> (Int,AstType.Entier(valeur))
-          | InfoVar (_, t, _, _) -> (t,AstType.Ident(info))
-        end
-      
+   | AstTds.Affectable af -> 
+    let (ta,na) = analyse_type_affectable af in
+    (ta,AstType.Affectable(na))     
      
   | AstTds.Booleen b -> 
       (Bool,AstType.Booleen (b))
@@ -68,7 +84,8 @@ let rec analyse_type_expression e =
     let teneliste = List.map analyse_type_expression eliste in
     let neliste = List.map sepExpr teneliste in
     let teliste = List.map sepTyp teneliste in
-    match info_ast_to_info info with
+    begin
+    match info_ast_to_info info with    
     | InfoFun (_,t,tl) -> 
       begin
         if (est_compatible_list tl teliste) then
@@ -77,13 +94,22 @@ let rec analyse_type_expression e =
           raise (TypesParametresInattendus(teliste,tl))
         end
     | _ -> failwith "Internal error"
+      end
+  | AstTds.Null -> (Undefined,AstType.Null)
+  | AstTds.New t -> (Pointeur t, AstType.New(t))
+  | AstTds.Adresse info ->  
+    begin
+    match info_ast_to_info info with          
+      | InfoVar(_,t,_,_) -> (Pointeur t, AstType.Adresse(info))
+      | _ -> failwith "Internal Error"
+    end
 
 
 (* analyse_type_instruction : AstTds.instruction -> AstType.instruction *)
 (* Paramètre i : l'instruction à analyser *)
 (* Vérifie la bonne utilisation des types et tranforme l'instruction
 en une instruction de type AstType.instruction *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Erreur si mauvaise utilisation des types *)
 let rec analyse_type_instruction i =
   match i with
   | AstTds.Declaration (t,info,e) ->
@@ -98,18 +124,15 @@ let rec analyse_type_instruction i =
         raise (TypeInattendu (te,t))
     end
     
-  | AstTds.Affectation (info,e) ->
+  | AstTds.Affectation (af,e) ->
     begin
+      let (ta,na) = analyse_type_affectable af in
       let (te,ne) = analyse_type_expression e in
-      match (info_ast_to_info info) with
-      | InfoVar (_, t, _, _) -> 
-        begin
-        if (est_compatible t te) then
-          AstType.Affectation(info,ne)          
-        else
-          raise (TypeInattendu (te,t))
-        end
-      | _ -> failwith "Internal error"
+      if (est_compatible ta te) then
+        AstType.Affectation(na,ne)          
+      else
+        raise (TypeInattendu (te,ta))
+      
       
     end
   | AstTds.Empty ->
@@ -164,13 +187,12 @@ let rec analyse_type_instruction i =
 (* analyse_type_bloc :  AstTds.bloc -> AstType.bloc *)
 (* Paramètre li : liste d'instructions à analyser *)
 (* Vérifie la bonne utilisation des types et tranforme le bloc en un bloc de type AstType.bloc *)
-(* Erreur si mauvaise utilisation des identifiants *)
-and analyse_type_bloc li =
-  
-   let nli = List.map (analyse_type_instruction) li in
-   (* afficher_locale tdsbloc ; *) (* décommenter pour afficher la table locale *)
-   nli
+and analyse_type_bloc li =  
+   List.map (analyse_type_instruction) li
 
+(* modif_param_fun : (typ * info_ast) list -> info_ast list *)
+(* Paramètre liste : liste de couple typ info des paramètres *)
+(* Transforme la liste de couples des paramètres en une liste d'info_ast *)
 let rec modif_param_fun liste =
   match liste with
   | [] -> []
@@ -180,48 +202,32 @@ let rec modif_param_fun liste =
       info::(modif_param_fun tl)
     end
 
+(* recup_list_param : (typ * info_ast) list -> typ list *)
+(* Paramètre liste : liste de couple typ info des paramètres *)
+(* Récupère la liste des typ des paramètres à partir de la liste des couples typ info *) 
 let rec recup_list_param liste =
   match liste with
   | [] -> []
   | (t,_)::tl ->
     t::(recup_list_param tl)
 
-(* analyse_tds_fonction : tds -> AstSyntax.fonction -> AstType.fonction *)
-(* Paramètre tds : la table des symboles courante *)
-(* Paramètre : la fonction à analyser *)
-(* Vérifie la bonne utilisation des identifiants et tranforme la fonction
+(* analyse_tds_fonction : tds -> AstTds.fonction -> AstType.fonction *)
+(* Paramètre() AstTds.Fonction(t,info,lp,b)) : la fonction à analyser *)
+(* Vérifie la bonne utilisation des types et tranforme la fonction
 en une fonction de type AstType.fonction *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Erreur si mauvaise utilisation des types *)
 let analyse_type_fonction (AstTds.Fonction(t,info,lp,b))  =
   let tp = recup_list_param lp in
   modifier_type_fonction t tp info;
   let nlp = modif_param_fun lp in
   let nb = analyse_type_bloc b in
-  AstType.Fonction(info,nlp,nb)
-
-(*
-  match chercherLocalement maintds n with
-  | Some _ -> raise (DoubleDeclaration n)
-  | None -> let newinfo = info_to_info_ast (InfoFun (n,Undefined,[])) in
-            ajouter maintds n newinfo;
-            let newtds = creerTDSFille maintds in
-            let listinfo = List.map (analyse_tds_typ_string newtds) lp in  
-            let tdsbloc = analyse_tds_bloc newtds (Some newinfo) li in         
-            AstType.Fonction (t,newinfo,listinfo,tdsbloc)
- *)        
-            
-             
-
-
-
-        
-
+  AstType.Fonction(info,nlp,nb)          
 
 (* analyser : AstTds.programme -> AstType.programme *)
 (* Paramètre : le programme à analyser *)
-(* Vérifie la bonne utilisation des identifiants et tranforme le programme
+(* Vérifie la bonne utilisation des types et tranforme le programme
 en un programme de type AstType.programme *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Erreur si mauvaise utilisation des types *)
 let analyser (AstTds.Programme (fonctions,prog)) =
   
   let nf = List.map (analyse_type_fonction) fonctions in
