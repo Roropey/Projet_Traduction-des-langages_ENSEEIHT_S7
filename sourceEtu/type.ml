@@ -14,7 +14,9 @@ let rec est_compatible t1 t2 =
   match t1, t2 with
   | Bool, Bool -> true
   | Int, Int -> true
-  | Rat, Rat -> true 
+  | Rat, Rat -> true
+  | Pointeur _, Undefined -> true
+  | Undefined, Pointeur _ -> true
   | Pointeur pt1, Pointeur pt2 -> est_compatible pt1 pt2 
   | Parenthesage part1, t2 -> est_compatible part1 t2
   | t1, Parenthesage part2 -> est_compatible t1 part2

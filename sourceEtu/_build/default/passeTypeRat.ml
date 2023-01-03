@@ -15,6 +15,12 @@ en une affectable de type AstType.affectable *)
 (* Erreur si mauvaise utilisation des types *)
 let rec analyse_type_affectable af =
   match af with
+  | AstTds.Deref aff ->
+    begin
+      match analyse_type_affectable aff with
+      | (Pointeur t, naff) -> (t,AstType.Deref(naff))
+      | (t,_) -> raise (TypeNonPointeur t)
+    end
   | AstTds.Ident info ->
     begin
       match info_ast_to_info info with
@@ -22,12 +28,7 @@ let rec analyse_type_affectable af =
       | InfoConst _ -> (Int,AstType.Ident(info))
       | InfoFun _ -> failwith "Internal Error"
     end
-  | AstTds.Deref aff ->
-    begin
-      match analyse_type_affectable aff with
-      | (Pointeur t, naff) -> (t,AstType.Deref(naff))
-      | (t,_) -> raise (TypeNonPointeur t)
-    end
+  
 
 (* analyse_type_expression : AstTds.expression -> AstType.expression *)
 (* Paramètre e : l'expression à analyser *)

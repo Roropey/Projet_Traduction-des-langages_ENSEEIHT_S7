@@ -11,6 +11,7 @@ type token =
   | PRINT
   | PO
   | PLUS
+  | PI
   | PF
   | NUM
   | NULL
@@ -25,6 +26,7 @@ type token =
   | EOF
   | ENTIER of (int)
   | ELSE
+  | DP
   | DENOM
   | CONST
   | CO

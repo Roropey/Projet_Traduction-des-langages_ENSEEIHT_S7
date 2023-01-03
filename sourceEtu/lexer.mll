@@ -30,9 +30,7 @@
         "true",    TRUE;
         "false",   FALSE;        
         "return",  RETURN;
-
         "new",     NEW;
-        "&",       ADRESSE;
         "null",    NULL
       ];
     fun id ->
@@ -62,6 +60,9 @@ rule token = parse
 | "+"          { PLUS }
 | "*"          { MULT }
 | "<"          { INF }
+| ":"          { DP }
+| "?"          { PI }
+| "&"          { ADRESSE }
 
 (* constantes entières *)
 | ("-")?['0'-'9']+ as i

@@ -11,6 +11,61 @@ open Code
 type t1 = Ast.AstPlacement.programme
 type t2 = string
 
+(* analyse_deref : AstPlacement.affectable -> String *)
+(* Paramètre af : l'affectable à analyser *)
+(* Donne le code TAM de l'affectable déférencé, utilisé dans
+   le stockage comme la lecture *)
+let rec analyse_deref af =
+  match af with 
+    | Deref aff -> 
+      let (t,code) = analyse_deref aff in 
+      begin
+        match t with 
+        | Pointeur typ -> (typ, code^(loadi 1))
+        | _ -> failwith "Internal error"
+      end
+    | Ident info -> 
+      begin 
+        match info_ast_to_info info with 
+          | InfoVar(_, Pointeur t, d, r) -> 
+            (t, (load 1 d r))
+          | _ -> failwith "Internal error"
+      end
+            
+
+
+(* analyse_code_affectable : AstPlacement.affectable -> String *)
+(* Paramètre af : l'expression à analyser *)
+(* Paramètre stockage : booléen indiquant la situation d'appel 
+   (stockage ou pas de l'affectant)*)
+(* Transforme l'affectable en code TAM *)
+let analyse_code_affectable af stockage =
+  if stockage
+    then
+      match af with
+      | Ident info ->
+        begin
+          match info_ast_to_info info with
+            | InfoVar (_,t,d,r) -> store (getTaille t) d r
+            | _ -> failwith "Internal error"
+        end
+      | Deref aff -> 
+          let (t,code) = analyse_deref aff in 
+          code^(storei (getTaille t))       
+    else
+      match af with
+      | Ident info ->
+        begin
+          match info_ast_to_info info with
+            | InfoVar (_,t,d,r) -> load (getTaille t) d r
+            | InfoConst (_,i) -> loadl_int i
+            | _ -> failwith "Internal error"
+        end
+      | Deref aff -> 
+          let (t,code) = analyse_deref aff in 
+          code^(loadi (getTaille t))  
+
+
 (* analyse_code_expression : AstPlacement.expression -> String *)
 (* Paramètre e : l'expression à analyser *)
 (* Transforme l'expression en code TAM *)
@@ -23,13 +78,7 @@ let rec analyse_code_expression e =
     | InfoFun (n,_,_) -> code^(call "ST" n)
     | _ -> failwith "Internal error"
     end
-  | Ident info -> 
-    begin
-    match info_ast_to_info info with
-      | InfoVar (_,t,d,r) -> load (getTaille t) d r
-      | InfoConst (_,i) -> loadl_int i
-      | InfoFun _ -> failwith "Internal error"
-    end
+  | Affectable af -> analyse_code_affectable af false
   | Booleen b ->
     begin
     if b then loadl_int 1
@@ -58,6 +107,14 @@ let rec analyse_code_expression e =
     | EquBool -> code1^code2^(subr "IEq")
     | Inf -> code1^code2^(subr "ILss")
     end
+  | Null -> loadl_int 0
+  | New t -> (loadl_int (getTaille t))^(subr "MALLOC")
+  | Adresse info ->
+    begin
+      match info_ast_to_info info with
+      | InfoVar (_,_,d,r) -> loada d r
+      | _ -> failwith "Internal error"
+    end
 
 (* analyse_placement_instruction : AstPlacement.instruction -> String *)
 (* Paramètre i : l'instruction à analyser *)
@@ -76,13 +133,9 @@ let rec analyse_code_instruction i =
     end
     
   | Affectation (af,e) ->
-    begin
-      match info_ast_to_info info with
-      | InfoVar (_,t,d,r) ->
-        let code = analyse_code_expression e in
-        code^(store (getTaille t) d r)
-      | _ -> failwith "Internal error"
-    end
+    let codeExp = analyse_code_expression e in
+    let codeAf = analyse_code_affectable af true in
+    codeExp^codeAf
   | Empty -> ""
        
   | AffichageInt e ->

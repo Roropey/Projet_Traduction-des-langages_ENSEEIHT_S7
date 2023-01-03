@@ -40,6 +40,9 @@ open Ast.AstSyntax
 %token NEW
 %token ADRESSE
 %token NULL
+(*Ajout conditionnelle ternaire*)
+%token DP
+%token PI
 
 (* Type de l'attribut synthétisé des non-terminaux *)
 %type <programme> prog
@@ -72,13 +75,15 @@ i :
 | CONST n=ID EQUAL e=ENTIER PV      {Constante (n,e)}
 | PRINT e1=e PV                     {Affichage (e1)}
 | IF exp=e li1=bloc ELSE li2=bloc   {Conditionnelle (exp,li1,li2)}
+| IF exp=e li=bloc                  {Conditionnelle (exp,li,[])}
+| PO exp=e PI li1=bloc DP li2=bloc  {Conditionnelle (exp,li1,li2)}
 | WHILE exp=e li=bloc               {TantQue (exp,li)}
 | RETURN exp=e PV                   {Retour (exp)}
 
 (*Création affectable*)
 af :
 | n = ID {Ident n}
-| MULT n = af {Deref n}
+| PO MULT n = af PF  {Deref n}
 
 typ :
 | BOOL    {Bool}
@@ -103,7 +108,7 @@ e :
 | ADRESSE n=ID            {Adresse n}           (*Ajout pour pointeur*)
 | n=af                    {Affectable n}        (*Ajout pour pointeur*)
 | NULL                    {Null}                (*Ajout pour pointeur*)
-| PO NEW t=typ PF         {New (t)}             (*Ajout pour pointeur*)
+| PO NEW t=typ PF         {New t}               (*Ajout pour pointeur*)
 (*| n=ID                    {Ident n}*)
 
 
