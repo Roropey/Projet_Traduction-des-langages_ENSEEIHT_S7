@@ -189,6 +189,10 @@ let%test_unit "testRetourFonction"=
   with
   | RetourDansMain -> ()
 
+let%test_unit "testPointeur"=
+  let _ = compiler (pathFichiersRat^"testPointeur.rat") in ()
+
+  
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix
 open Filename

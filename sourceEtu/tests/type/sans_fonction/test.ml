@@ -382,6 +382,52 @@ let%test_unit "testOperation11"=
 let%test_unit "testOperation12"= 
   let _ = compiler (pathFichiersRat^"testOperation12.rat") in ()
 
+let%test_unit "testPointeur1" =
+  let _ = compiler (pathFichiersRat^"testPointeur1.rat") in ()
+
+let%test_unit "testPointeur2" =
+  let _ = compiler (pathFichiersRat^"testPointeur2.rat") in ()
+
+let%test_unit "testPointeur3" =
+  let _ = compiler (pathFichiersRat^"testPointeur3.rat") in ()
+
+let%test_unit "testPointeur4" =
+  let _ = compiler (pathFichiersRat^"testPointeur4.rat") in ()
+
+let%test_unit "testPointeur5" =
+  try
+    let _ = compiler (pathFichiersRat^"testPointeur5.rat")
+    in raise ErreurNonDetectee
+  with
+    | TypeInattendu(Pointeur Rat, Pointeur Int) -> ()
+
+let%test_unit "testPointeur6" =
+  try
+    let _ = compiler (pathFichiersRat^"testPointeur6.rat")
+    in raise ErreurNonDetectee
+  with
+    | TypeInattendu(Pointeur Bool, Pointeur Int) -> ()
+
+let%test_unit "testPointeur7" =
+  try
+    let _ = compiler (pathFichiersRat^"testPointeur7.rat")
+    in raise ErreurNonDetectee
+  with
+    | TypeInattendu(Pointeur Int, Pointeur Rat) -> ()    
+
+let%test_unit "testPointeur8" =
+  try
+    let _ = compiler (pathFichiersRat^"testPointeur8.rat")
+    in raise ErreurNonDetectee
+  with
+    | TypeNonPointeur(Int) -> ()    
+
+let%test_unit "testPointeur9" =
+  try
+    let _ = compiler (pathFichiersRat^"testPointeur9.rat")
+    in raise ErreurNonDetectee
+  with
+    | TypeInattendu(Undefined, Int) -> ()   
 
 
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
