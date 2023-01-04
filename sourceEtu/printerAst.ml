@@ -87,6 +87,12 @@ struct
     | TantQue (c,b) -> "TantQue  : TQ "^(string_of_expression c)^"\n"^
                                   "FAIRE \n"^((List.fold_right (fun i tq -> (string_of_instruction i)^tq) b ""))^"\n"
     | Retour (e) -> "Retour  : RETURN "^(string_of_expression e)^"\n"
+    | Loop (li) -> "Loop : "^(List.fold_right (fun i tq -> (string_of_instruction i)^tq) li "")^"\n"
+    | IdLoop (n,li) -> "Loop : ID : "^n^"\n"^(List.fold_right (fun i tq -> (string_of_instruction i)^tq) li "")^"\n"
+    | Break -> "Break \n"
+    | IdBreak (n) -> "Break : "^n^"\n"
+    | Continue -> "Continue \n"
+    | IdContinue (n) -> "Continue : "^n^"\n"
 
   (* Conversion des fonctions *)
   let string_of_fonction (Fonction(t,n,lp,li)) = (string_of_type t)^" "^n^" ("^((List.fold_right (fun (t,n) tq -> (string_of_type t)^" "^n^" "^tq) lp ""))^") = \n"^

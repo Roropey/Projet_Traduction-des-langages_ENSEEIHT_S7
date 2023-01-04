@@ -43,6 +43,11 @@ open Ast.AstSyntax
 (*Ajout conditionnelle ternaire*)
 %token DP
 %token PI
+(*Ajout loop*)
+%token LOOP
+%token BREAK
+%token CONTINUE
+
 
 (* Type de l'attribut synthétisé des non-terminaux *)
 %type <programme> prog
@@ -79,6 +84,12 @@ i :
 | PO exp=e PI li1=bloc DP li2=bloc  {Conditionnelle (exp,li1,li2)}
 | WHILE exp=e li=bloc               {TantQue (exp,li)}
 | RETURN exp=e PV                   {Retour (exp)}
+| LOOP li=bloc                      {Loop (li)}
+| n=ID DP LOOP li=bloc              {IdLoop (n,li)}
+| BREAK PV                          {Break}
+| BREAK n=ID PV                     {IdBreak (n)}
+| CONTINUE PV                       {Continue}
+| CONTINUE n=ID PV                  {IdContinue (n)}
 
 (*Création affectable*)
 af :
