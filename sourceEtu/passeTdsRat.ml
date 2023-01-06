@@ -125,7 +125,7 @@ let rec id_present_pile pile n =
     match info_ast_to_info ia with
     | InfoLoop (_,ninfo) -> 
       begin
-        if ninfo = n then info
+        if ninfo = n then Some ninfo
         else id_present_pile pile n
       end
     | _ -> failwith "Internal Error"
@@ -260,7 +260,7 @@ let rec analyse_tds_instruction tds oia pileLoop i =
       ajouter_pile pileLoop ia;
       let nb = analyse_tds_bloc tds oia pileLoop b  in
       remove_pile pileLoop;
-      if (id_present_pile pileLoop n) == Some _ then Printf.eprintf "Warning : Identifiant loop déjà existant"
+      if (id_present_pile pileLoop n) <> None then Printf.eprintf "Warning : Identifiant loop déjà existant"
       AstTds.Loop(nb,ia)
   | AstSyntax.Break -> 
     begin

@@ -192,6 +192,8 @@ let%test_unit "testRetourFonction"=
 let%test_unit "testPointeur"=
   let _ = compiler (pathFichiersRat^"testPointeur.rat") in ()
 
+let%test_unit "testConditionnelleTernaire"=
+  let _ = compiler (pathFichiersRat^"testConditionnelleTernaire.rat") in ()
   
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix
