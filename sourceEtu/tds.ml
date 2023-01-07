@@ -6,7 +6,7 @@ type info =
   | InfoConst of string * int
   | InfoVar of string * typ * int * string
   | InfoFun of string * typ * typ list
-  | InfoLoop of string * string
+  | InfoLoop of string * string (*etiqutte loop * identifiant de la loop*)
 
 (* Données stockées dans la tds  et dans les AST : pointeur sur une information *)
 type info_ast = info ref  

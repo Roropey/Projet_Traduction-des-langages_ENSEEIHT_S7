@@ -59,6 +59,11 @@ let rec analyse_placement_instruction i dep reg =
         (AstPlacement.Retour(e,tailleType,tailleList),0)
       | _ -> failwith "Internal error"
       end
+  | AstType.Loop (b,info) ->
+    let nb = analyse_placement_bloc b dep reg in
+    (AstPlacement.Loop(nb,info),0)
+  | AstType.Break info -> (AstPlacement.Break(info),0)
+  | AstType.Continue info -> (AstPlacement.Continue(info),0)
 
 
 (* analyse_placement_bloc :  AstType.bloc -> int -> String -> AstPlacement.bloc *)

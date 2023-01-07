@@ -83,7 +83,11 @@ let rec analyse_tds_expression tds e =
           end           
         | None -> raise(IdentifiantNonDeclare n)
       end
-
+    | AstSyntax.Ternaire (eC,e1,e2) ->
+      let ne2 = analyse_tds_expression tds e2 in
+      let ne1 = analyse_tds_expression tds e1 in
+      let neC = analyse_tds_expression tds eC in
+      AstTds.Ternaire(neC,ne1,ne2)
 (* Génération de nom de loop à l'aide d'un compteur *)
 let getNomLoop = 
   let num = ref 0 in
@@ -116,7 +120,7 @@ let ajouter_pile pile info =
 
 (* id_present_pile : info_ast t -> string -> info_ast *)
 (* Paramètre pile : la pile dans laquelle on cherche le nom *)
-(* Paramètre info : le nom de la boucle à chercher *)
+(* Paramètre n : l'identifiant de la boucle à chercher *)
 (* Renvoie la première info_ast correspondant *)
 let rec id_present_pile pile n =
   if is_empty pile then None
@@ -125,7 +129,7 @@ let rec id_present_pile pile n =
     match info_ast_to_info ia with
     | InfoLoop (_,ninfo) -> 
       begin
-        if ninfo = n then info
+        if ninfo = n then Some ia
         else id_present_pile pile n
       end
     | _ -> failwith "Internal Error"
@@ -251,8 +255,7 @@ let rec analyse_tds_instruction tds oia pileLoop i =
     let nli = analyse_tds_bloc tds oia pileLoop li in
     remove_pile pileLoop;
     AstTds.Loop(nli,ia)
-  | AstSyntax.IdLoop (n,b) ->
-    
+  | AstSyntax.IdLoop (n,b) ->    
       let nomLoop = getNomLoop () in
       let info = InfoLoop (nomLoop,n) in
       let ia = info_to_info_ast info in
@@ -260,7 +263,7 @@ let rec analyse_tds_instruction tds oia pileLoop i =
       ajouter_pile pileLoop ia;
       let nb = analyse_tds_bloc tds oia pileLoop b  in
       remove_pile pileLoop;
-      if (id_present_pile pileLoop n) == Some _ then Printf.eprintf "Warning : Identifiant loop déjà existant"
+      if (id_present_pile (copy pileLoop) n) != None then Printf.eprintf "Warning : Identifiant loop déjà existant";
       AstTds.Loop(nb,ia)
   | AstSyntax.Break -> 
     begin
@@ -284,7 +287,7 @@ let rec analyse_tds_instruction tds oia pileLoop i =
     end
   | AstSyntax.IdContinue (n) ->
     begin
-      match id_present_pile tds n with
+      match id_present_pile pileLoop n with
       | Some info ->
         AstTds.Continue(info)
       | None ->
