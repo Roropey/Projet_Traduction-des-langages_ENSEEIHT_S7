@@ -158,6 +158,28 @@ let%test _ =
     ajouter tdsf "x" ix2;
     ajouter tdsf "z" iz;
     chercherLocalement tdsf "a" = None
+let%test _ =
+  let tds = creerTDSMere() in
+  let l1 = info_to_info_ast (InfoLoop("loop1","loop")) in
+  let l2 = info_to_info_ast (InfoLoop("loop2","loop")) in
+  ajouter tds "loopN1" l1;
+  ajouter tds "loopN2" l2;
+  let tdsf = creerTDSFille(tds) in 
+  let l3 = info_to_info_ast (InfoLoop("loop3","l3")) in
+  ajouter tdsf "loopN3" l3;
+  chercherLocalement tdsf "loopN3" = Some l3
+let%test _ =
+  let tds = creerTDSMere() in
+  let l1 = info_to_info_ast (InfoLoop("loop1","loop")) in
+  let l2 = info_to_info_ast (InfoLoop("loop2","loop")) in
+  ajouter tds "loopN1" l1;
+  ajouter tds "loopN2" l2;
+  let tdsf = creerTDSFille(tds) in 
+  let l3 = info_to_info_ast (InfoLoop("loop3","l3")) in
+  ajouter tdsf "loopN3" l3;
+  chercherLocalement tdsf "loopN2" = None
+
+
 
 (* Recherche les informations d'un identificateur dans la tds globale *)
 (* Si l'identificateur n'est pas présent dans la tds de plus bas niveau *)
@@ -279,7 +301,36 @@ let%test _ =
     ajouter tdsf "x" ix2;
     ajouter tdsf "z" iz;
     chercherGlobalement tdsf "a" = None
-
+    let%test _ =
+    let tds = creerTDSMere() in
+    let l1 = info_to_info_ast (InfoLoop("loop1","loop")) in
+    let l2 = info_to_info_ast (InfoLoop("loop2","loop")) in
+    ajouter tds "loopN1" l1;
+    ajouter tds "loopN2" l2;
+    let tdsf = creerTDSFille(tds) in 
+    let l3 = info_to_info_ast (InfoLoop("loop3","l3")) in
+    ajouter tdsf "loopN3" l3;
+    chercherGlobalement tdsf "loopN2" = Some l2
+  let%test _ =
+    let tds = creerTDSMere() in
+    let l1 = info_to_info_ast (InfoLoop("loop1","loop")) in
+    let l2 = info_to_info_ast (InfoLoop("loop2","loop")) in
+    ajouter tds "loopN1" l1;
+    ajouter tds "loopN2" l2;
+    let tdsf = creerTDSFille(tds) in 
+    let l3 = info_to_info_ast (InfoLoop("loop3","l3")) in
+    ajouter tdsf "loopN3" l3;
+    chercherGlobalement tdsf "loop1" = None
+  let%test _ =
+    let tds = creerTDSMere() in
+    let l1 = info_to_info_ast (InfoLoop("loop1","loop")) in
+    let l2 = info_to_info_ast (InfoLoop("loop2","loop")) in
+    ajouter tds "loopN1" l1;
+    ajouter tds "loopN2" l2;
+    let tdsf = creerTDSFille(tds) in 
+    let l3 = info_to_info_ast (InfoLoop("loop3","l3")) in
+    ajouter tdsf "loopN3" l3;
+    chercherGlobalement tdsf "loop" = None
 
 (* Convertie une info en une chaine de caractère - pour affichage *)
 let string_of_info info =

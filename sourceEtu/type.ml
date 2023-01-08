@@ -14,7 +14,7 @@ let rec est_compatible t1 t2 =
   | Bool, Bool -> true
   | Int, Int -> true
   | Rat, Rat -> true
-  | Undefined, Undefined -> true  (*???????????*)
+  | Undefined, Undefined -> true  
   | Pointeur _, Undefined -> true
   | Undefined, Pointeur _ -> true
   | Pointeur pt1, Pointeur pt2 -> est_compatible pt1 pt2 
@@ -46,6 +46,12 @@ let%test _ = not (est_compatible (Pointeur Int) Rat)
 let%test _ = not (est_compatible (Pointeur Int) Bool)
 let%test _ = not (est_compatible (Pointeur Int) (Pointeur Rat))
 let%test _ = not (est_compatible (Pointeur (Pointeur Int)) (Pointeur Int))
+let%test _ = est_compatible Undefined (Pointeur Bool)
+let%test _ = est_compatible Undefined (Pointeur Int)
+let%test _ = est_compatible Undefined (Pointeur Rat)
+let%test _ = est_compatible (Pointeur Bool) Undefined
+let%test _ = est_compatible (Pointeur Int) Undefined
+let%test _ = est_compatible (Pointeur Rat) Undefined
 
 
 let est_compatible_list lt1 lt2 =
@@ -72,3 +78,5 @@ let getTaille t =
 let%test _ = getTaille Int = 1
 let%test _ = getTaille Bool = 1
 let%test _ = getTaille Rat = 2
+let%test _ = getTaille (Pointeur Rat) = 1
+let%test _ = getTaille (Pointeur Int) = 1

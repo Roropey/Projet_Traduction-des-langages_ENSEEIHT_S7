@@ -88,6 +88,8 @@ let rec analyse_tds_expression tds e =
       let ne1 = analyse_tds_expression tds e1 in
       let neC = analyse_tds_expression tds eC in
       AstTds.Ternaire(neC,ne1,ne2)
+
+(* getNomLoop : unit -> string *)
 (* Génération de nom de loop à l'aide d'un compteur *)
 let getNomLoop = 
   let num = ref 0 in
@@ -96,15 +98,25 @@ let getNomLoop =
     "loop"^((string_of_int (!num)))
 
 (* Gestion de la pile *)
-
-
-
 (* remove_pile : info_ast t -> unit *)
 (* Paramètre pile : la pile dont on veut enlever le sommet *)
 (* Enlève le sommet de la pile sans le renvoyer *)
 let remove_pile pile =
   let _ = pop_opt pile in
   ()
+
+let%test _ =
+  let pile = Stack.create() in
+  push 1 pile;
+  remove_pile pile;
+  (pop_opt pile) = None
+
+let%test _ =
+  let pile = Stack.create() in
+  push 1 pile;
+  push 2 pile;
+  remove_pile pile;
+  Some 2 = (pop_opt pile)
 
 (* ajouter_pile : info_ast t -> info_ast -> info_ast list*)
 (* Paramètre pile : la pile dans laquelle on veut ajouter l'info *)
@@ -117,6 +129,11 @@ let ajouter_pile pile info =
     | _ -> failwith "Internal Error"
   end
 
+let%test _ =
+  let pile = Stack.create() in
+  let info_ast = info_to_info_ast (InfoLoop("loop1","x")) in
+  ajouter_pile pile info_ast;
+  true
 
 (* id_present_pile : info_ast t -> string -> info_ast *)
 (* Paramètre pile : la pile dans laquelle on cherche le nom *)
