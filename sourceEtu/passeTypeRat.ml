@@ -96,7 +96,7 @@ let rec analyse_type_expression e =
         end
     | _ -> failwith "Internal error"
       end
-  | AstTds.Null -> (Undefined,AstType.Null)
+  | AstTds.Null -> (Pointeur(Undefined),AstType.Null)
   | AstTds.New t -> (Pointeur t, AstType.New(t))
   | AstTds.Adresse info ->  
     begin

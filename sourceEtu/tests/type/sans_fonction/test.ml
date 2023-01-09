@@ -427,7 +427,7 @@ let%test_unit "testPointeur9" =
     let _ = compiler (pathFichiersRat^"testPointeur9.rat")
     in raise ErreurNonDetectee
   with
-    | TypeInattendu(Undefined, Int) -> ()   
+    | TypeInattendu(Pointeur(Undefined), Int) -> ()   
 
 
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
