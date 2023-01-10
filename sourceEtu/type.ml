@@ -46,12 +46,12 @@ let%test _ = not (est_compatible (Pointeur Int) Rat)
 let%test _ = not (est_compatible (Pointeur Int) Bool)
 let%test _ = not (est_compatible (Pointeur Int) (Pointeur Rat))
 let%test _ = not (est_compatible (Pointeur (Pointeur Int)) (Pointeur Int))
-let%test _ = est_compatible Undefined (Pointeur Bool)
-let%test _ = est_compatible Undefined (Pointeur Int)
-let%test _ = est_compatible Undefined (Pointeur Rat)
-let%test _ = est_compatible (Pointeur Bool) Undefined
-let%test _ = est_compatible (Pointeur Int) Undefined
-let%test _ = est_compatible (Pointeur Rat) Undefined
+let%test _ = est_compatible (Pointeur Undefined) (Pointeur Bool)
+let%test _ = est_compatible (Pointeur Undefined) (Pointeur Int)
+let%test _ = est_compatible (Pointeur Undefined) (Pointeur Rat)
+let%test _ = est_compatible (Pointeur Bool) (Pointeur Undefined)
+let%test _ = est_compatible (Pointeur Int) (Pointeur Undefined)
+let%test _ = est_compatible (Pointeur Rat) (Pointeur Undefined)
 
 
 let est_compatible_list lt1 lt2 =

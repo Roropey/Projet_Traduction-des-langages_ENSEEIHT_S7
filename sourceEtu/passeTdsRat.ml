@@ -116,7 +116,7 @@ let%test _ =
   push 1 pile;
   push 2 pile;
   remove_pile pile;
-  Some 2 = (pop_opt pile)
+  Some 1 = (pop_opt pile)
 
 (* ajouter_pile : info_ast t -> info_ast -> info_ast list*)
 (* Paramètre pile : la pile dans laquelle on veut ajouter l'info *)

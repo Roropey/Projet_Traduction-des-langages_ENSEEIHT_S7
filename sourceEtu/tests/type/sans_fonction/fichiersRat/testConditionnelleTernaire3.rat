@@ -1,5 +1,5 @@
 test{
   int x = 1;
   bool b = true;
-  print( (!b) ? x : b );
+  print( (b=false) ? x : b );
 }

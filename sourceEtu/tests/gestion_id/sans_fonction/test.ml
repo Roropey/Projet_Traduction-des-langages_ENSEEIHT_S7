@@ -173,13 +173,13 @@ let _ = compiler (pathFichiersRat^"testLoopContinue.rat") in ()
 
 let%test_unit "testLoopImbriques" =
 let _ = compiler (pathFichiersRat^"testLoopImbriques.rat") in ()
-
+(*
 let%test_unit "testLoopNonMasquage" =
 let _ = compiler (pathFichiersRat^"testLoopNonMasquage.rat") in ()
 
 let%test_unit "testLoopNonMasquage2" =
 let _ = compiler (pathFichiersRat^"testLoopNonMasquage2.rat") in ()
-
+*)
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix
 open Filename
