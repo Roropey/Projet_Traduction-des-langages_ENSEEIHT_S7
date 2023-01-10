@@ -196,7 +196,7 @@ let%test_unit "testPointeur"=
 let%test_unit "testConditionnelleTernaire"=
   let _ = compiler (pathFichiersRat^"testConditionnelleTernaire.rat") in ()
 
-  let%test_unit "testCombinaisonsConstructions"=
+let%test_unit "testCombinaisonsConstructions"=
   let _ = compiler (pathFichiersRat^"testCombinaisonsConstructions.rat") in ()
 
   

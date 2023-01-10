@@ -147,11 +147,38 @@ let%test "test7_y1" =
 let%test "test7_z1" = 
   test (pathFichiersRat^"test7.rat")  "main" ("z1",1)  (7, "SB")
 
-let%test "testPointeur1_x" = 
+let%test "testPointeur_x" = 
   test (pathFichiersRat^"testPointeur.rat")  "main" ("x",1)  (0, "SB")
 
-let%test "testPointeur1_p" = 
+let%test "testPointeur_p" = 
   test (pathFichiersRat^"testPointeur.rat")  "main" ("p",1)  (1, "SB")
 
-let%test "testPointeur1_p2" = 
+let%test "testPointeur_p2" = 
   test (pathFichiersRat^"testPointeur.rat")  "main" ("p2",1)  (2, "SB")
+
+let%test "testLoop_x_1" = 
+  test (pathFichiersRat^"testLoop.rat")  "main" ("x",1)  (0, "SB")
+
+let%test "testLoop_y" = 
+  test (pathFichiersRat^"testLoop.rat")  "main" ("y",1)  (1, "SB")
+
+let%test "testLoop_x_2" = 
+  test (pathFichiersRat^"testLoop.rat")  "main" ("x",2)  (2, "SB")
+
+let%test "testElseOptionnel_x_1" = 
+  test (pathFichiersRat^"testElseOptionnel.rat")  "main" ("x",1)  (0, "SB")
+  
+let%test "testElseOptionnel_y_1" = 
+  test (pathFichiersRat^"testElseOptionnel.rat")  "main" ("y",1)  (1, "SB")
+
+let%test "testElseOptionnel_x_2" = 
+  test (pathFichiersRat^"testElseOptionnel.rat")  "main" ("x",2)  (3, "SB")
+
+let%test "testElseOptionnel_y_2" = 
+  test (pathFichiersRat^"testElseOptionnel.rat")  "main" ("y",2)  (4, "SB")
+
+let%test "testConditionnelleTernaire_x" =
+  test (pathFichiersRat^"testConditionnelleTernaire.rat") "main" ("x",1) (0, "SB")
+
+let%test "testConditionnelleTernaire_y" =
+  test (pathFichiersRat^"testConditionnelleTernaire.rat") "main" ("y",1) (1, "SB")

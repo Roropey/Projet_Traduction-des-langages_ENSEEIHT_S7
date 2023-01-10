@@ -1,5 +1,5 @@
-int f (int a) {
-    return a;
+int f (int* p rat r) {
+    return (*p);
 }
 
 
