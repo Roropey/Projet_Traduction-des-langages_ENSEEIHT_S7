@@ -429,6 +429,41 @@ let%test_unit "testPointeur9" =
   with
     | TypeInattendu(Pointeur(Undefined), Int) -> ()   
 
+let%test_unit "testElseOptionnel" =
+  let _ = compiler (pathFichiersRat^"testElseOptionnel.rat") in ()
+
+let%test_unit "testConditionnelleTernaire" =
+  let _ = compiler (pathFichiersRat^"testConditionnelleTernaire.rat") in ()
+
+let%test_unit "testConditionnelleTernaire2" =
+  let _ = compiler (pathFichiersRat^"testConditionnelleTernaire2.rat") in ()
+
+let%test_unit "testConditionnelleTernaire3" =
+  try 
+    let _ = compiler (pathFichiersRat^"testConditionnelleTernaire3.rat")
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu(Bool, Int) -> ()
+
+
+let%test_unit "testLoop1" =
+let _ = compiler (pathFichiersRat^"testLoop1.rat") in ()
+
+let%test_unit "testLoopBreak" =
+let _ = compiler (pathFichiersRat^"testLoopBreak.rat") in ()
+
+let%test_unit "testLoopContinue" =
+let _ = compiler (pathFichiersRat^"testLoopContinue.rat") in ()
+
+let%test_unit "testLoopImbriques" =
+let _ = compiler (pathFichiersRat^"testLoopImbriques.rat") in ()
+
+let%test_unit "testLoopNonMasquage" =
+let _ = compiler (pathFichiersRat^"testLoopNonMasquage.rat") in ()
+
+let%test_unit "testLoopNonMasquage2" =
+let _ = compiler (pathFichiersRat^"testLoopNonMasquage2.rat") in ()
+
 
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix
