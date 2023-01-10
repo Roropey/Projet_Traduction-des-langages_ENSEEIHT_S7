@@ -1,4 +1,4 @@
-type typ = Bool | Int | Rat | Undefined | Pointeur of typ | Parenthesage of typ
+type typ = Bool | Int | Rat | Undefined | Pointeur of typ 
 
 let rec string_of_type t = 
   match t with
@@ -7,7 +7,6 @@ let rec string_of_type t =
   | Rat  ->  "Rat"
   | Undefined -> "Undefined"
   | Pointeur t  -> "Pointeur "^(string_of_type t)
-  | Parenthesage t -> "("^(string_of_type t)^")"
 
 
 let rec est_compatible t1 t2 =
@@ -15,12 +14,10 @@ let rec est_compatible t1 t2 =
   | Bool, Bool -> true
   | Int, Int -> true
   | Rat, Rat -> true
-  | Undefined, Undefined -> true  (*???????????*)
-  | Pointeur _, Undefined -> true
-  | Undefined, Pointeur _ -> true
+  | Undefined, Undefined -> true  
+  | Pointeur _, Pointeur Undefined -> true
+  | Pointeur Undefined, Pointeur _ -> true
   | Pointeur pt1, Pointeur pt2 -> est_compatible pt1 pt2 
-  | Parenthesage part1, t2 -> est_compatible part1 t2
-  | t1, Parenthesage part2 -> est_compatible t1 part2
   | _ -> false 
 
 let%test _ = est_compatible Bool Bool
@@ -49,6 +46,12 @@ let%test _ = not (est_compatible (Pointeur Int) Rat)
 let%test _ = not (est_compatible (Pointeur Int) Bool)
 let%test _ = not (est_compatible (Pointeur Int) (Pointeur Rat))
 let%test _ = not (est_compatible (Pointeur (Pointeur Int)) (Pointeur Int))
+let%test _ = est_compatible Undefined (Pointeur Bool)
+let%test _ = est_compatible Undefined (Pointeur Int)
+let%test _ = est_compatible Undefined (Pointeur Rat)
+let%test _ = est_compatible (Pointeur Bool) Undefined
+let%test _ = est_compatible (Pointeur Int) Undefined
+let%test _ = est_compatible (Pointeur Rat) Undefined
 
 
 let est_compatible_list lt1 lt2 =
@@ -64,15 +67,16 @@ let%test _ = not (est_compatible_list [Int] [Rat ; Int])
 let%test _ = not (est_compatible_list [Int ; Rat] [Rat ; Int])
 let%test _ = not (est_compatible_list [Bool ; Rat ; Bool] [Bool ; Rat ; Bool ; Int])
 
-let rec getTaille t =
+let getTaille t =
   match t with
   | Int -> 1
   | Bool -> 1
   | Rat -> 2
   | Undefined -> 0
   | Pointeur _ -> 1
-  | Parenthesage parenthesee -> getTaille parenthesee
   
 let%test _ = getTaille Int = 1
 let%test _ = getTaille Bool = 1
 let%test _ = getTaille Rat = 2
+let%test _ = getTaille (Pointeur Rat) = 1
+let%test _ = getTaille (Pointeur Int) = 1

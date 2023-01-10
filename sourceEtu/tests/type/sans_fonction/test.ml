@@ -427,7 +427,7 @@ let%test_unit "testPointeur9" =
     let _ = compiler (pathFichiersRat^"testPointeur9.rat")
     in raise ErreurNonDetectee
   with
-    | TypeInattendu(Undefined, Int) -> ()   
+    | TypeInattendu(Pointeur(Undefined), Int) -> ()   
 
 let%test_unit "testElseOptionnel" =
   let _ = compiler (pathFichiersRat^"testElseOptionnel.rat") in ()

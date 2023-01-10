@@ -80,8 +80,7 @@ i :
 | CONST n=ID EQUAL e=ENTIER PV      {Constante (n,e)}
 | PRINT e1=e PV                     {Affichage (e1)}
 | IF exp=e li1=bloc ELSE li2=bloc   {Conditionnelle (exp,li1,li2)}
-| IF exp=e li=bloc                  {Conditionnelle (exp,li,[])}
-| PO exp=e PI li1=bloc DP li2=bloc  {Conditionnelle (exp,li1,li2)}
+| IF exp=e li=bloc                  {Conditionnelle (exp,li,[])} (*Ajout pour le bloc else optionnel*)
 | WHILE exp=e li=bloc               {TantQue (exp,li)}
 | RETURN exp=e PV                   {Retour (exp)}
 | LOOP li=bloc                      {Loop (li)}
@@ -101,7 +100,7 @@ typ :
 | INT     {Int}
 | RAT     {Rat}
 | t=typ MULT {Pointeur t} (*Ajout règle typage pour pointeur*)
-| PO t=typ PF {Parenthesage t} (*Ajout règle pour la gestion des types parenthésés*)
+| PO t=typ PF {t}         (*Ajout règle pour la gestion des types parenthésés*)
 
 e : 
 | CALL n=ID PO lp=e* PF   {AppelFonction (n,lp)}
@@ -111,6 +110,7 @@ e :
 | e=ENTIER                {Entier e}
 | NUM e1=e                {Unaire(Numerateur,e1)}
 | DENOM e1=e              {Unaire(Denominateur,e1)}
+
 | PO e1=e PLUS e2=e PF    {Binaire (Plus,e1,e2)}
 | PO e1=e MULT e2=e PF    {Binaire (Mult,e1,e2)}
 | PO e1=e EQUAL e2=e PF   {Binaire (Equ,e1,e2)}
@@ -120,6 +120,7 @@ e :
 | n=af                    {Affectable n}        (*Ajout pour pointeur*)
 | NULL                    {Null}                (*Ajout pour pointeur*)
 | PO NEW t=typ PF         {New t}               (*Ajout pour pointeur*)
+| PO expC=e PI exp1=e DP exp2=e PF {Ternaire (expC,exp1,exp2)}  (*Ajout pour la condionnelle ternaire*)
 (*| n=ID                    {Ident n}*)
 
 

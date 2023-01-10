@@ -73,6 +73,7 @@ struct
     | Null -> "null "
     | New t -> "new "^(string_of_type t)^" "
     | Adresse n -> "& "^n^" "
+    | Ternaire (eC,e1,e2) -> "( "^(string_of_expression eC)^" ? "^(string_of_expression e1)^" : "^(string_of_expression e2)^" )"
 
   (* Conversion des instructions *)
   let rec string_of_instruction i =

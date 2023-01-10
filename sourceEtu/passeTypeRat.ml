@@ -26,7 +26,7 @@ let rec analyse_type_affectable af =
       match info_ast_to_info info with
       | InfoVar (_,t,_,_) -> (t,AstType.Ident(info))      
       | InfoConst _ -> (Int,AstType.Ident(info))
-      | InfoFun _ -> failwith "Internal Error"
+      | _ -> failwith "Internal Error"
     end
   
 
@@ -96,7 +96,7 @@ let rec analyse_type_expression e =
         end
     | _ -> failwith "Internal error"
       end
-  | AstTds.Null -> (Undefined,AstType.Null)
+  | AstTds.Null -> (Pointeur(Undefined),AstType.Null)
   | AstTds.New t -> (Pointeur t, AstType.New(t))
   | AstTds.Adresse info ->  
     begin
@@ -104,6 +104,21 @@ let rec analyse_type_expression e =
       | InfoVar(_,t,_,_) -> (Pointeur t, AstType.Adresse(info))
       | _ -> failwith "Internal Error"
     end
+  | AstTds.Ternaire (eC,e1,e2) ->
+    begin
+      let (tec,nec) = analyse_type_expression eC in
+        if (est_compatible tec Bool) then
+          begin
+          let (te1,ne1) = analyse_type_expression e1 in
+          let (te2,ne2) = analyse_type_expression e2 in
+          if (est_compatible te1 te2) then 
+            (te1,AstType.Ternaire (nec, ne1, ne2))            
+          else 
+            raise(TypeInattendu (te1,te2))
+          end
+        else
+          raise(TypeInattendu (tec,Bool))
+      end
 
 
 (* analyse_type_instruction : AstTds.instruction -> AstType.instruction *)
@@ -172,16 +187,23 @@ let rec analyse_type_instruction i =
         raise(TypeInattendu(te,Bool))
     end
   | AstTds.Retour (e,info) ->
-    let (te,ne) = analyse_type_expression e in
-    match info_ast_to_info info with
-    | InfoFun (_,t,_) ->
-      begin
-        if (est_compatible t te) then
-          AstType.Retour (ne,info)
-        else
-          raise (TypeInattendu(te,t))
+    begin
+      let (te,ne) = analyse_type_expression e in
+      match info_ast_to_info info with
+      | InfoFun (_,t,_) ->
+        begin
+          if (est_compatible t te) then
+            AstType.Retour (ne,info)
+          else
+            raise (TypeInattendu(te,t))
+        end
+      | _ -> failwith "Internal error"
       end
-    | _ -> failwith "Internal error"
+  | AstTds.Loop (b,info) ->
+    let nb = analyse_type_bloc b in
+    AstType.Loop(nb,info)
+  | AstTds.Break info -> AstType.Break info
+  | AstTds.Continue info -> AstType.Continue (info)
   
 
 

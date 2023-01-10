@@ -115,6 +115,13 @@ let rec analyse_code_expression e =
       | InfoVar (_,_,d,r) -> loada d r
       | _ -> failwith "Internal error"
     end
+  | Ternaire (eC,e1,e2) ->
+    let codee2 = analyse_code_expression e2 in
+    let codee1 = analyse_code_expression e1 in
+    let codeeC = analyse_code_expression eC in
+    let etqElse = label (getEtiquette ()) in
+    let etqEnd = label (getEtiquette ()) in
+    codeeC^(jumpif 0 etqElse)^codee1^(jump etqEnd)^etqElse^codee2^etqEnd
 
 (* analyse_placement_instruction : AstPlacement.instruction -> String *)
 (* Paramètre i : l'instruction à analyser *)
@@ -169,6 +176,32 @@ let rec analyse_code_instruction i =
     let code = analyse_code_expression e in
     code^(return tResult tParam)
   end
+| Loop (b,info) ->
+  begin
+    match info_ast_to_info info with
+    | InfoLoop(etq,_) ->
+      let codeb = analyse_code_bloc b in
+      let labelStart = label (etq^"start") in
+      let labelEnd = label (etq^"end") in
+      labelStart^codeb^labelEnd
+    | _ -> failwith "Internal error"
+    end
+| Break info ->
+  begin
+    match info_ast_to_info info with
+    | InfoLoop(etq,_) ->
+      let labelEnd = label (etq^"end") in
+      (jump labelEnd)
+    | _ -> failwith "Internal error"
+    end
+| Continue info ->
+  begin
+    match info_ast_to_info info with
+    | InfoLoop(etq,_) ->
+      let labelStart = label (etq^"start") in
+      (jump labelStart)
+    | _ -> failwith "Internal error"
+    end
 
 
 (* analyse_placement_bloc :  AstPlacement.bloc -> String *)
