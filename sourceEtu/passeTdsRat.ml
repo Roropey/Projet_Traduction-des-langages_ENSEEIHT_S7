@@ -276,7 +276,7 @@ let rec analyse_tds_instruction tds oia pileLoop i =
       let nomLoop = getNomLoop () in
       let info = InfoLoop (nomLoop,n) in
       let ia = info_to_info_ast info in
-      ajouter tds n ia;
+      ajouter tds nomLoop ia;
       ajouter_pile pileLoop ia;
       let nb = analyse_tds_bloc tds oia pileLoop b  in
       remove_pile pileLoop;

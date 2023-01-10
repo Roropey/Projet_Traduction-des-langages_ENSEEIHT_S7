@@ -183,7 +183,7 @@ let rec analyse_code_instruction i =
       let codeb = analyse_code_bloc b in
       let labelStart = label (etq^"start") in
       let labelEnd = label (etq^"end") in
-      labelStart^codeb^labelEnd
+      labelStart^codeb^(jump (etq^"start"))^labelEnd
     | _ -> failwith "Internal error"
     end
 | Break info ->
